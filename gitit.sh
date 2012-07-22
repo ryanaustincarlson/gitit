@@ -13,7 +13,7 @@ cat <<EOF
   to any extra commands you give it. 
 
   Note that 
-    "-S" overrides the update so you ONLY get the status.
+    '-S' overrides the update so you ONLY get the status.
     '-C' includes '-c' (though they are not mutually exclusive)
 
   OPTIONS:
