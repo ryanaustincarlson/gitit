@@ -18,6 +18,8 @@ cat <<EOF
 
   OPTIONS:
     -h    Show this message
+    -A    Shortcut for -psC
+
     -p    Push in addition to pulling
 
     -s    Check the status of each repository
@@ -39,15 +41,16 @@ commit=false
 add=false
 pause=false
 
-while getopts "b:psScCha" opt; do
+while getopts "b:psScChAa" opt; do
 	case $opt in
-    b) basepath=$OPTARG ;;
+    A) push=true ; stat=true ; add=true ; commit=true ;;
     p) push=true ;;
     s) stat=true ;;
     S) onlyStat=true ; stat=true ;;
     c) commit=true ;;
     C) add=true ; commit=true ;;
     a) pause=true ;;
+    b) basepath=$OPTARG ;;
     h) usage; exit 0 ;;
     \?) echo "incorrect usage"; usage; echo; exit 1;;
 	esac
