@@ -3,6 +3,9 @@
 #set -e
 set -u
 
+## TODO: make pull the default, but if there are other options
+##       and pull isn't specifically mentioned, then set it to false
+
 usage() {
 cat <<EOF
   usage: $0 opts
@@ -73,8 +76,8 @@ progress(){
 }
 
 gitit(){
-    cd $basepath
-    cd $1
+    cd $basepath || exit 1
+    cd $1 || exit 1
 
     printf '\033[1m\033[34m>>> \033[1m\033[37m%s\033[0m\n' "$1"
 
