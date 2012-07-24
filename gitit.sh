@@ -3,85 +3,70 @@
 #set -e
 set -u
 
-## TODO: make pull the default, but if there are other options
-##       and pull isn't specifically mentioned, then set it to false
-
 usage() {
 cat <<EOF
   usage: $0 opts
 
   This script updates all the git repos to keep my machines synced up.
 
-  By default, it runs 'git pull' in each repository in addition
-  to any extra commands you give it. 
+  In the absence of any flags, it runs 'git pull' in each repository. 
+  If other flags are given, you must explicitly provide the '-u' option.
 
-  Note that 
-    '-S' overrides the update so you ONLY get the status.
-    '-C' includes '-c' (though they are not mutually exclusive)
+  Note that '-C' includes '-c' (though they are not mutually exclusive)
 
   OPTIONS:
     -h    Show this message
-    -A    Shortcut for -psC
+    -a    Shortcut for -Cups
 
+    -u    Pull from all repos (this is the default action in absense of any flags)
     -p    Push in addition to pulling
 
     -s    Check the status of each repository
-    -S    Check ONLY the status -- don't do anything else! 
 
     -c    Commit STAGED changes (for EVERY repo)
     -C    Commit (selectively) ALL changes using 'git add -p', then commit (for EVERY repo)
 
-    -b    Base path that git repos are located (default: $basepath)
-    -a    Pause after acting on each repo (press Enter to contnue, or ^C to stop)
+    -x    Pause after acting on each repo (press Enter to contnue, or ^C to stop)
 EOF
 }
 
-basepath="$HOME/local"
 push=false
 stat=false
-onlyStat=false
 commit=false
 add=false
 pause=false
+pull=false
 
-while getopts "b:psScChAa" opt; do
+while getopts "b:aupscChx" opt; do
 	case $opt in
-    A) push=true ; stat=true ; add=true ; commit=true ;;
+    a) pull=true ; push=true ; stat=true ; add=true ; commit=true ;;
+    u) pull=true ;;
     p) push=true ;;
     s) stat=true ;;
-    S) onlyStat=true ; stat=true ;;
     c) commit=true ;;
     C) add=true ; commit=true ;;
-    a) pause=true ;;
-    b) basepath=$OPTARG ;;
+    x) pause=true ;;
     h) usage; exit 0 ;;
     \?) echo "incorrect usage"; usage; echo; exit 1;;
 	esac
 done
 
-# make sure basepath is an absolute path
-basepath="`$HOME/local/scripts/abs_path.sh $basepath`"
-
-# before returning from gitit(), make sure you print
-# out a blank line and offer the user a brief pause
-beforeyougotit(){
-    echo
-    if $pause ; then
-        read foobar
-    fi
-}
+# if any command flags were given, then we 
+# don't want to just *assume* that we're updating 
+if  ! ($push || $stat || $commit) ; then
+    pull=true
+fi
 
 progress(){
     printf '\033[1m\033[34m... \033[1m\033[37m%s\033[0m\n' "$1"
 }
 
 gitit(){
-    cd $basepath || exit 1
     cd $1 || exit 1
 
     printf '\033[1m\033[34m>>> \033[1m\033[37m%s\033[0m\n' "$1"
 
-    if ! $onlyStat ; then
+    if $pull ; then
         progress "Updating"
         git pull
     fi
@@ -90,9 +75,6 @@ gitit(){
         progress "Getting Status"
         git status
     fi
-
-    ## we're done here 
-    if $onlyStat ; then beforeyougotit; return; fi
 
     if $add ; then
         progress "Interactive Add"
@@ -109,14 +91,17 @@ gitit(){
         git push
     fi
 
-    beforeyougotit
+    echo
+    if $pause ; then read foobar; fi
 }
 
-gitit class-code
-gitit config
-gitit pyutils
-gitit research
-gitit scripts
-gitit side-projects
-gitit website
+basepath=$HOME/local
+
+gitit $basepath/class-code
+gitit $basepath/config
+gitit $basepath/pyutils
+gitit $basepath/research
+gitit $basepath/scripts
+gitit $basepath/side-projects
+gitit $basepath/website
 
