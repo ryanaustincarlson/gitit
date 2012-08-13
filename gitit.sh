@@ -196,6 +196,6 @@ gitit $basepath/website
 # we want to have at least some output, so if nothing happens
 # then print this friendly message
 if ! $something_happened ; then
-    header "All good! No changes to make!"
+    header "All good! Nothing to do!"
 fi
 
