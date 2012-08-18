@@ -187,6 +187,7 @@ something_happened=false # this can be changed in the progress() function
 
 gitit $basepath/class-code
 gitit $basepath/config
+gitit $basepath/dropkicker
 gitit $basepath/pyutils
 gitit $basepath/research
 gitit $basepath/scripts
