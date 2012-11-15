@@ -197,6 +197,7 @@ gitit $basepath/scripts
 gitit $basepath/side-projects
 gitit $basepath/website
 gitit $basepath/machine-learning-finalproject
+gitit $basepath/hint-messaging
 
 # we want to have at least some output, so if nothing happens
 # then print this friendly message
