@@ -10,8 +10,9 @@ cat <<EOF
 
   This script updates all git repos specified at the bottom of this file.
 
-  In the absence of any flags, it runs 'git pull' in each repository. 
-  If other flags are given, you must explicitly provide the '-u' option.
+  In the absence of any flags, it runs 'git pull' and 'git status' in each
+  repository.  If other flags are given, you must explicitly provide the '-u'
+  or '-s' options.
 
   By default, the script checks if the operations you've requested actually
   need to be done (by checking git status). For example, if there's nothing to
@@ -59,8 +60,9 @@ done
 
 # if any command flags were given, then we 
 # don't want to just *assume* that we're updating 
-if  ! ($push || $stat || $commit) ; then
+if  ! ($push || $stat || $commit || $pull) ; then
     pull=true
+    stat=true
 fi
 
 # helper functions to pretty-print some text
