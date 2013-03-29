@@ -200,6 +200,9 @@ gitit $basepath/side-projects
 gitit $basepath/website
 gitit $basepath/machine-learning-finalproject
 gitit $basepath/hint-messaging
+gitit $basepath/dk/dropkick-samosa-heroku
+gitit $basepath/dk/dropkicker-web-app
+gitit $basepath/lrn
 
 # we want to have at least some output, so if nothing happens
 # then print this friendly message
