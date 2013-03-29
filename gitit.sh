@@ -82,7 +82,7 @@ should_i_stat(){
     # also show status if everything's been committed but hasn't yet been pushed
     if `should_i_push "$mystatus"` ; then
         echo true
-    elif [[ `echo $mystatus | grep -ic "nothing to commit (working directory clean)"` == 0 ]]; then
+    elif [[ `echo $mystatus | egrep -ic "nothing to commit.*working directory clean.*"` == 0 ]]; then
         echo true
     else
         echo false
