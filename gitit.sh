@@ -158,7 +158,7 @@ gitit(){
 
     if $add && $should_add ; then
         progress "Interactive Add"
-        git add -p
+        git add -p 
 
         # need to get status again, because add could have changed the state of things
         if ! $justdoit ; then
@@ -191,12 +191,13 @@ config=$HOME/.gititrc
 something_happened=false # this can be changed in the progress() function
 
 if [ -f $config ]; then
+    count=0
     while read line; do 
         if [[ $line = \#* ]]; then
             continue
         fi
 
-        directory=`echo $line | awk '{print $1}' | sed "s:_HOME_:$HOME:"`
+        directory=`echo $line | awk '{print $1}' | sed "s:~:$HOME:"`
 
         # if directory doesn't exist, make it
         mkdir -p $directory 
@@ -208,10 +209,17 @@ if [ -f $config ]; then
             git clone $repo $directory
         fi
 
-        gitit $directory
+        DIRECTORIES[$count]=$directory
+        count=$((count+1))
 
     done < $HOME/.gititrc
 fi
+
+# for some reason, interactive add (-C) gets into an infinite loop 
+# when it's inside the `while read line` block, so I moved it here
+for directory in "${DIRECTORIES[@]}"; do
+    gitit $directory
+done
 
 # we want to have at least some output, so if nothing happens
 # then print this friendly message
