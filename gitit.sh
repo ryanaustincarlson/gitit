@@ -186,23 +186,33 @@ gitit(){
     echo
 }
 
-basepath=$HOME/local
+config=$HOME/.gititrc
 
 something_happened=false # this can be changed in the progress() function
 
-gitit $basepath/class-code
-gitit $basepath/config
-gitit $basepath/dropkicker
-gitit $basepath/pyutils
-gitit $basepath/research
-gitit $basepath/scripts
-gitit $basepath/side-projects
-gitit $basepath/website
-gitit $basepath/machine-learning-finalproject
-gitit $basepath/hint-messaging
-gitit $basepath/dk/dropkick-samosa-heroku
-gitit $basepath/dk/dropkicker-web-app
-gitit $basepath/lrn
+if [ -f $config ]; then
+    while read line; do 
+        if [[ $line = \#* ]]; then
+            continue
+        fi
+
+        directory=`echo $line | awk '{print $1}' | sed "s:_HOME_:$HOME:"`
+
+        # if directory doesn't exist, make it
+        if [ ! -d $directory ]; then
+            mkdir $directory
+        fi 
+        # if .git doesn't exist, check out the repo
+        if [ ! -d "$directory/.git" ]; then
+            repo=`echo $line | awk '{print $2}'`
+            header "Cloning $repo"
+            git clone $repo $directory
+        fi
+
+        gitit $directory
+
+    done < $HOME/.gititrc
+fi
 
 # we want to have at least some output, so if nothing happens
 # then print this friendly message
