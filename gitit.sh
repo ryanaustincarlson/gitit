@@ -199,9 +199,8 @@ if [ -f $config ]; then
         directory=`echo $line | awk '{print $1}' | sed "s:_HOME_:$HOME:"`
 
         # if directory doesn't exist, make it
-        if [ ! -d $directory ]; then
-            mkdir $directory
-        fi 
+        mkdir -p $directory 
+
         # if .git doesn't exist, check out the repo
         if [ ! -d "$directory/.git" ]; then
             repo=`echo $line | awk '{print $2}'`
