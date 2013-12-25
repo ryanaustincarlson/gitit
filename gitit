@@ -3,12 +3,14 @@
 #set -e
 set -u
 
+default_config=$HOME/.gititrc
 
 usage() {
 cat <<EOF
   usage: $0 opts
 
-  This script updates all git repos specified in ~/.gititrc.
+  This script updates all git repos specified in a configuration file 
+  (default: $default_config).
 
   In the absence of any flags, it runs 'git pull' and 'git status' in each
   repository.  If other flags are given, you must explicitly provide the '-u'
@@ -34,6 +36,8 @@ cat <<EOF
 
     -c    Commit STAGED changes (for EVERY repo)
     -C    Commit (selectively) ALL changes using 'git add -p', then commit (for EVERY repo)
+
+    -g    
 EOF
 }
 
@@ -43,27 +47,55 @@ commit=false
 add=false
 pull=false
 justdoit=false
+config=$default_config
 
-while getopts "b:aupscChj" opt; do
-	case $opt in
-    a) pull=true ; push=true ; stat=true ; add=true ; commit=true ;;
-    u) pull=true ;;
-    p) push=true ;;
-    s) stat=true ;;
-    c) commit=true ;;
-    C) add=true ; commit=true ;;
-    j) justdoit=true ;;
-    h) usage; exit 0 ;;
-    \?) echo "incorrect usage"; usage; echo; exit 1;;
+while getopts "g:aupscChj" opt; do
+    case $opt in
+        a) pull=true ; push=true ; stat=true ; add=true ; commit=true ;;
+        u) pull=true ;;
+        p) push=true ;;
+        s) stat=true ;;
+        c) commit=true ;;
+        C) add=true ; commit=true ;;
+        j) justdoit=true ;;
+        g) config=$OPTARG ;;
+        h) usage; exit 0 ;;
+        \?) echo "incorrect usage"; usage; echo; exit 1;;
 	esac
 done
 
-config=$HOME/.gititrc
-if [ ! -f $config ]; then
-    echo -e "Can't find config file at $config. Run \`$0 -h\` for more details. Exiting."
-    exit 1
+# get full path
+if [[ $config != $default_config ]]; then
+
+    if [ -z $config ]; then
+        echo -e "Config file must be non-empty!\nRun \`$0 -h\` for more details. Exiting." 
+        exit 1
+    fi
+
+    failed=false
+    new_config=`readlink -f $config 2>/dev/null` || failed=true
+
+    # os x readlink is a little weird, so let's see if they've installed greadlink (gnu version)
+    if $failed; then
+        failed=false
+        new_config=`greadlink -f $config 2>/dev/null` || failed=true
+    fi
+
+    # if we're still failing, revert to perl
+    if $failed; then
+        new_config=`perl -e 'use Cwd "abs_path"; print abs_path(shift)' $config 2>/dev/null`
+    fi
+
+    if [ ! -z $new_config ]; then
+        config=$new_config
+    fi
 fi
 
+# we've done our best to find the full path. Let's see if you gave us a real path. 
+if [[ ! -f $config ]]; then
+    echo -e "Can't find config file at $config\nRun \`$0 -h\` for more details. Exiting."
+    exit 1
+fi
 
 # if any command flags were given, then we 
 # don't want to just *assume* that we're updating 
@@ -195,30 +227,28 @@ gitit(){
 
 something_happened=false # this can be changed in the progress() function
 
-if [ -f $config ]; then
-    count=0
-    while read line; do 
-        if [[ $line = \#* ]]; then
-            continue
-        fi
+count=0
+while read line; do 
+    if [[ $line = \#* ]]; then
+        continue
+    fi
 
-        directory=`echo $line | awk '{print $1}' | sed "s:~:$HOME:"`
+    directory=`echo $line | awk '{print $1}' | sed "s:~:$HOME:"`
 
-        # if directory doesn't exist, make it
-        mkdir -p $directory 
+    # if directory doesn't exist, make it
+    mkdir -p $directory 
 
-        # if .git doesn't exist, check out the repo
-        if [ ! -d "$directory/.git" ]; then
-            repo=`echo $line | awk '{print $2}'`
-            header "Cloning $repo"
-            git clone $repo $directory
-        fi
+    # if .git doesn't exist, check out the repo
+    if [ ! -d "$directory/.git" ]; then
+        repo=`echo $line | awk '{print $2}'`
+        header "Cloning $repo"
+        git clone $repo $directory
+    fi
 
-        DIRECTORIES[$count]=$directory
-        count=$((count+1))
+    DIRECTORIES[$count]=$directory
+    count=$((count+1))
 
-    done < $HOME/.gititrc
-fi
+done < $config
 
 # for some reason, interactive add (-C) gets into an infinite loop 
 # when it's inside the `while read line` block, so I moved it here
