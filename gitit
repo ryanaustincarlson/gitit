@@ -58,6 +58,13 @@ while getopts "b:aupscChj" opt; do
 	esac
 done
 
+config=$HOME/.gititrc
+if [ ! -f $config ]; then
+    echo -e "Can't find config file at $config. Run \`$0 -h\` for more details. Exiting."
+    exit 1
+fi
+
+
 # if any command flags were given, then we 
 # don't want to just *assume* that we're updating 
 if  ! ($push || $stat || $commit || $pull) ; then
@@ -185,8 +192,6 @@ gitit(){
 
     echo
 }
-
-config=$HOME/.gititrc
 
 something_happened=false # this can be changed in the progress() function
 
