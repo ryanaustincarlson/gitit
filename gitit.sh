@@ -8,7 +8,7 @@ usage() {
 cat <<EOF
   usage: $0 opts
 
-  This script updates all git repos specified at the bottom of this file.
+  This script updates all git repos specified in ~/.gititrc.
 
   In the absence of any flags, it runs 'git pull' and 'git status' in each
   repository.  If other flags are given, you must explicitly provide the '-u'
