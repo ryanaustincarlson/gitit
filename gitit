@@ -98,6 +98,8 @@ if [[ ! -f $config ]]; then
     exit 1
 fi
 
+# defines the default behavior
+#
 # if any command flags were given, then we 
 # don't want to just *assume* that we're updating 
 if  ! ($push || $stat || $commit || $pull) ; then
@@ -228,6 +230,27 @@ gitit(){
 
 something_happened=false # this can be changed in the progress() function
 
+# there should be either comments or exactly two space-separated items in each
+# line. Check for that before doing anything else
+count=1
+while read line; do
+    if [[ $line = \#* ]]; then
+        continue
+    fi
+
+    first=`echo $line | awk '{print $1}'`
+    second=`echo $line | awk '{print $2}'`
+    third=`echo $line | awk '{print $3}'`
+
+    if [[ -z $first || -z $second || ! -z $third ]]; then
+        echo "Looks like your config file ($config) is malformed at line $count. Exiting."
+        exit 1
+    fi
+
+    count=$((count+1))
+done < $config
+
+# clone repos as necessary
 count=0
 while read line; do 
     if [[ $line = \#* ]]; then
@@ -248,7 +271,6 @@ while read line; do
 
     DIRECTORIES[$count]=$directory
     count=$((count+1))
-
 done < $config
 
 # for some reason, interactive add (-C) gets into an infinite loop 
