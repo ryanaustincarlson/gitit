@@ -37,7 +37,8 @@ cat <<EOF
     -c    Commit STAGED changes (for EVERY repo)
     -C    Commit (selectively) ALL changes using 'git add -p', then commit (for EVERY repo)
 
-    -g    
+    -g [path]
+          Specify a configuration file location
 EOF
 }
 
