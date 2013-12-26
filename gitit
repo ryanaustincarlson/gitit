@@ -29,7 +29,7 @@ cat <<EOF
     -a    Shortcut for -Cups
     -j    Don't check if an operation *needs* to happen, just do it.
 
-    -u    Pull from all repos (this is the default action in absense of any flags)
+    -u    Pull from all repos
     -p    Push in addition to pulling
 
     -s    Check the status of each repository
